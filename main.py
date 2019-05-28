@@ -12,8 +12,23 @@ def split(points, indexStrart, indexEnd):
     if indexEnd - indexStrart == 1 :
         d = Diagrama()
 
-        x1 = points[indexStrart]
-        x2 = points[indexEnd]
+        if points[indexStrart].x < points[indexEnd].x:
+            x1 = points[indexStrart]
+            x2 = points[indexEnd]
+        if points[indexStrart].x == points[indexEnd].x:
+            if points[indexStrart].y < points[indexEnd].y:
+                x1 = points[indexStrart]
+                x2 = points[indexEnd]
+            else :
+                x2 = points[indexStrart]
+                x1 = points[indexEnd]
+        else :
+            print("x1:")
+            print(points[indexStrart].x)
+            print(points[indexStrart].y)
+            print("x2:")
+            print(points[indexEnd].x)
+            print(points[indexEnd].y)
 
         y_center = (x1.y + x2.y)/2
         x_center = (x1.x + x2.x)/2
@@ -21,9 +36,15 @@ def split(points, indexStrart, indexEnd):
         e1 = Edge()
         e2 = Edge()
 
-        k_otrezka = (x2.x - x1.x)/(x2.y - x1.y);
+        if x2.y - x1.y != 0:
+            k_otrezka = (x2.x - x1.x)/(x2.y - x1.y)
+            b_line = y_center + k_otrezka * x_center
+        else:
+            k_otrezka = 0
+            b_line = x_center
 
-        b_line =  y_center + k_otrezka*x_center
+
+
 
         e1.a = 1
         e1.b = k_otrezka
@@ -36,16 +57,18 @@ def split(points, indexStrart, indexEnd):
         e1.face = x1
         e2.face = x2
 
-        v1 = Vertex(points[indexStrart], e1)
-        v2 = Vertex(points[indexStrart], e2)
+        v1 = Vertex(x1, e1)
+        v2 = Vertex(x2, e2, v1, v1)
+        v1.cw_next = v2
+        v1.ccw_next = v2
         d.vertexes.append(v1)
         d.vertexes.append(v2)
 
-        d.convexHull.append(x1)
-        d.convexHull.append(x2)
+        d.convexHull.append(v1)
+        d.convexHull.append(v2)
 
-        d.edges(e1)
-        d.edges(e2)
+        d.edges.append(e1)
+        d.edges.append(e2)
 
         return d
     if indexEnd == indexStrart :
@@ -54,6 +77,7 @@ def split(points, indexStrart, indexEnd):
         v = Vertex(x)
 
         d.convexHull.append(v)
+        d.vertexes.append(v)
         return d
     else :
         d1 = split(points, indexStrart, indexStrart + (indexEnd - indexStrart) // 2)
@@ -65,12 +89,10 @@ def split(points, indexStrart, indexEnd):
 def main():
     points = []
 
-    points.append(Point(3,3))
-    points.append(Point(5,5))
-    points.append(Point(3,3))
-    points.append(Point(5,6))
+    points.append(Point(1,4))
+    points.append(Point(5,4))
     points.append(Point(7,6))
-    points.append(Point(7,9))
+    points.append(Point(8,1))
     split(points, 0 , len(points) - 1)
 
 
