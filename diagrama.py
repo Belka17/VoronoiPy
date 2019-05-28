@@ -93,6 +93,22 @@ class Diagrama:
         d.vertexes.extend(d1.vertexes)
         d.vertexes.extend(d2.vertexes)
 
+        possibleEdges = []
+        if p.edge:
+            eSt = p.edge
+            eCurrent = p.edge
+            possibleEdges.append(eSt)
+            while eCurrent.nextE and eCurrent.nextE != eSt:
+                eCurrent = eCurrent.nextE
+                possibleEdges.append(eCurrent)
+        if q.edge:
+            eSt = q.edge
+            eCurrent = q.edge
+            possibleEdges.append(eSt)
+            while eCurrent.nextE and eCurrent.nextE != eSt:
+                eCurrent = eCurrent.nextE
+                possibleEdges.append(eCurrent)
+
         return Diagrama()
 
 
