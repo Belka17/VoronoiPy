@@ -1,5 +1,6 @@
 from unittest import mock
 from point import Point
+from edge import Edge
 
 
 class Diagrama:
@@ -88,31 +89,49 @@ class Diagrama:
             if p == start:
                 break
 
-        return result, p, q
+        return result, p, q, cp_p, cp_q
 
     @staticmethod
     def unite(d1, d2):
         d = Diagrama()
-        cH, p, q = Diagrama.convexHull(d1, d2)
+        cH, p, q, cp_p, cp_q = Diagrama.convexHull(d1, d2)
         d.convexHull.extend(cH)
         d.vertexes.extend(d1.vertexes)
         d.vertexes.extend(d2.vertexes)
-        possibleEdges = Diagrama.getPossibleEdges(p, q)
-        points = Diagrama.getFirstIntersection(possibleEdges,p,q)
-        nextPoint = Diagrama.getNextPointFromAllIntersections(points)
+        d.edges.extend(d2.vertexes)
+        d.edges.extend(d1.vertexes)
+
+        while (p!= cp_p and q != cp_q) or (p!= cp_q and q != cp_p):
+
+            possibleEdges = Diagrama.getPossibleEdges(p, q)
+            points, line = Diagrama.getFirstIntersection(possibleEdges,p,q)
+            nextPoint = Diagrama.getNextPointFromAllIntersections(points)
+
+            e1 = Edge(line.a, line.b, line.c, p)
+            e2 = Edge(line.a, line.b, line.c, q)
+            e1.twin = e2
+            e2.twin = e1
+
+            nextPoint.edge.prevE = e1
+            e1.prevE = nextPoint.edge
+            e1.pointFrom = Point(nextPoint.x, nextPoint.y)
+
+            d.edges.append(e1)
+            d.edges.append(e2)
 
 
-
-        if nextPoint.face1 == p :
-            p = nextPoint.face1
-        if nextPoint.face2 == p :
-            p = nextPoint.face2
-        if nextPoint.face1 == q :
-            q = nextPoint.face1
-        if nextPoint.face2 == q :
-            q = nextPoint.face2
-
-
+            if nextPoint.face1 == p :
+                p = nextPoint.face2
+                continue
+            if nextPoint.face2 == p :
+                p = nextPoint.face1
+                continue
+            if nextPoint.face1 == q :
+                q = nextPoint.face2
+                continue
+            if nextPoint.face2 == q :
+                q = nextPoint.face1
+                continue
 
 
 
@@ -178,7 +197,7 @@ class Diagrama:
             p.edge = x
             points.append(p)
 
-        return points
+        return points, line
 
 
     @staticmethod
