@@ -92,7 +92,15 @@ class Diagrama:
         d.convexHull.extend(cH)
         d.vertexes.extend(d1.vertexes)
         d.vertexes.extend(d2.vertexes)
+        possibleEdges = Diagrama.getPossibleEdges(p, q)
 
+
+
+        return d
+
+
+    @staticmethod
+    def getPossibleEdges(p, q):
         possibleEdges = []
         if p.edge:
             eSt = p.edge
@@ -101,6 +109,11 @@ class Diagrama:
             while eCurrent.nextE and eCurrent.nextE != eSt:
                 eCurrent = eCurrent.nextE
                 possibleEdges.append(eCurrent)
+            if eCurrent.nextE == eSt:
+                eCurrent = eSt
+                while eCurrent.prevE:
+                    eCurrent = eCurrent.prevE
+                    possibleEdges.append(eCurrent)
         if q.edge:
             eSt = q.edge
             eCurrent = q.edge
@@ -108,7 +121,13 @@ class Diagrama:
             while eCurrent.nextE and eCurrent.nextE != eSt:
                 eCurrent = eCurrent.nextE
                 possibleEdges.append(eCurrent)
+            if eCurrent.nextE == eSt:
+                eCurrent = eSt
+                while eCurrent.prevE:
+                    eCurrent = eCurrent.prevE
+                    possibleEdges.append(eCurrent)
+        return possibleEdges
 
-        return Diagrama()
-
-
+    @staticmethod
+    def GetFirstIntersection(possibleEdges):
+        ш=7
