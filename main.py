@@ -36,26 +36,24 @@ def split(points, indexStrart, indexEnd):
         e1 = Edge()
         e2 = Edge()
 
-        if x2.y - x1.y != 0:
-            k_otrezka = (x2.x - x1.x)/(x2.y - x1.y)
-            b_line = y_center + k_otrezka * x_center
-        else:
-            k_otrezka = 0
-            b_line = x_center
+        a_line = x2.y - x1.y
+        b_line = -(x2.x - x1.x)
+        """c_line = x1.y(x2.x - x1.x) - x1.x(x2.y - x1.y)"""
 
+        a_perp = -b_line
+        b_perp = a_line
+        c_perp = -b_perp*y_center - a_perp*x_center
 
+        e1.a = a_perp
+        e1.b = b_perp
+        e1.c = c_perp
 
+        e2.a = a_perp
+        e2.b = b_perp
+        e2.c = c_perp
 
-        e1.a = 1
-        e1.b = k_otrezka
-        e1.c = -b_line
-
-        e2.a = 1
-        e2.b = k_otrezka
-        e2.c = -b_line
-
-        e1.face = x1
-        e2.face = x2
+        e1.twin = e2
+        e2.twin = e1
 
         v1 = Vertex(x1, e1)
         v2 = Vertex(x2, e2, v1, v1)
@@ -63,6 +61,9 @@ def split(points, indexStrart, indexEnd):
         v1.ccw_next = v2
         d.vertexes.append(v1)
         d.vertexes.append(v2)
+
+        e1.face = v1
+        e2.face = v2
 
         d.convexHull.append(v1)
         d.convexHull.append(v2)
