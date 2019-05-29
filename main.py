@@ -33,9 +33,6 @@ def split(points, indexStrart, indexEnd):
         y_center = (x1.y + x2.y)/2
         x_center = (x1.x + x2.x)/2
 
-        e1 = Edge()
-        e2 = Edge()
-
         a_line = x2.y - x1.y
         b_line = -(x2.x - x1.x)
         """c_line = x1.y(x2.x - x1.x) - x1.x(x2.y - x1.y)"""
@@ -44,35 +41,30 @@ def split(points, indexStrart, indexEnd):
         b_perp = a_line
         c_perp = -b_perp*y_center - a_perp*x_center
 
-        e1.a = a_perp
-        e1.b = b_perp
-        e1.c = c_perp
+        v1 = Vertex(x1)
+        v2 = Vertex(x2)
 
-        e2.a = a_perp
-        e2.b = b_perp
-        e2.c = c_perp
-
-        e1.twin = e2
-        e2.twin = e1
-
-        v1 = Vertex(x1, e1)
-        v2 = Vertex(x2, e2, v1, v1)
         v1.cw_next = v2
         v1.ccw_next = v2
+        v2.ccw_next = v1
+        v2.cw_next = v1
+
         d.vertexes.append(v1)
         d.vertexes.append(v2)
 
-        e1.face = v1
-        e2.face = v2
+        e1 = Edge(a_perp, b_perp, c_perp, v1, v2)
 
         d.convexHull.append(v1)
         d.convexHull.append(v2)
 
+        v1.edges.append(e1)
+        v2.edges.append(e1)
+
         d.edges.append(e1)
-        d.edges.append(e2)
 
         return d
-    if indexEnd == indexStrart :
+
+    if indexEnd == indexStrart:
         d = Diagrama()
         x = points[indexStrart]
         v = Vertex(x)

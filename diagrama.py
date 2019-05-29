@@ -1,6 +1,7 @@
 from unittest import mock
 from point import Point
 from edge import Edge
+from vertex import Vertex
 
 
 class Diagrama:
@@ -98,27 +99,35 @@ class Diagrama:
         d.convexHull.extend(cH)
         d.vertexes.extend(d1.vertexes)
         d.vertexes.extend(d2.vertexes)
-        d.edges.extend(d2.vertexes)
-        d.edges.extend(d1.vertexes)
-
-        while (p!= cp_p and q != cp_q) or (p!= cp_q and q != cp_p):
+        d.edges.extend(d2.edges)
+        d.edges.extend(d1.edges)
+        flag = False
+        """while not(p.point.x == cp_p.point.x and p.y == cp_p.point.y) and not(q.x == cp_q.point.x and q.y == cp_q.point.y):"""
+        while not (p.point == cp_p.point and q.point == cp_q.point):
 
             possibleEdges = Diagrama.getPossibleEdges(p, q)
             points, line = Diagrama.getFirstIntersection(possibleEdges,p,q)
-            nextPoint = Diagrama.getNextPointFromAllIntersections(points)
+            e = Edge(line.a, line.b, line.c, p)
+            e.face1 = d.getVertex(p.point.x, p.point.y)
+            e.face2 = d.getVertex(q.point.x, q.point.y)
+            e.face1.edges.append(e)
+            e.face2.edges.append(e)
+            if flag:
+                e.pointFrom = nextPoint
 
-            e1 = Edge(line.a, line.b, line.c, p)
-            e2 = Edge(line.a, line.b, line.c, q)
-            e1.twin = e2
-            e2.twin = e1
+            if flag:
+                nextPoint = Diagrama.getNextPointFromAllIntersections(points, nextPoint)
+            else:
+                nextPoint = Diagrama.getNextPointFromAllIntersections(points)
+                flag = True
 
-            nextPoint.edge.prevE = e1
-            e1.prevE = nextPoint.edge
-            e1.pointFrom = Point(nextPoint.x, nextPoint.y)
+            e.pointTo = Point(nextPoint.x, nextPoint.y)
+            d.edges.append(e)
 
-            d.edges.append(e1)
-            d.edges.append(e2)
-
+            if nextPoint.edge.pointFrom:
+                nextPoint.edge.pointTo = Point(nextPoint.x, nextPoint.y)
+            else:
+                nextPoint.edge.pointFrom = Point(nextPoint.x, nextPoint.y)
 
             if nextPoint.face1 == p :
                 p = nextPoint.face2
@@ -133,7 +142,14 @@ class Diagrama:
                 q = nextPoint.face1
                 continue
 
-
+        e = Edge()
+        e.a, e.b, e.c = Diagrama.getLineEquition(p, q)
+        e.pointFrom = nextPoint
+        e.face1 = d.getVertex(p.point.x, p.point.y)
+        e.face2 = d.getVertex(q.point.x, q.point.y)
+        e.face1.edges.append(e)
+        e.face2.edges.append(e)
+        d.edges.append(e)
 
 
 
@@ -142,36 +158,49 @@ class Diagrama:
     @staticmethod
     def getPossibleEdges(p, q):
         possibleEdges = []
-        if p.edge:
-            eSt = p.edge
-            eCurrent = p.edge
-            possibleEdges.append(eSt)
-            while eCurrent.nextE and eCurrent.nextE != eSt:
-                eCurrent = eCurrent.nextE
-                possibleEdges.append(eCurrent)
-            if eCurrent.nextE == eSt:
-                eCurrent = eSt
-                while eCurrent.prevE:
-                    eCurrent = eCurrent.prevE
-                    possibleEdges.append(eCurrent)
-        if q.edge:
-            eSt = q.edge
-            eCurrent = q.edge
-            possibleEdges.append(eSt)
-            while eCurrent.nextE and eCurrent.nextE != eSt:
-                eCurrent = eCurrent.nextE
-                possibleEdges.append(eCurrent)
-            if eCurrent.nextE == eSt:
-                eCurrent = eSt
-                while eCurrent.prevE:
-                    eCurrent = eCurrent.prevE
-                    possibleEdges.append(eCurrent)
+        possibleEdges.extend(p.edges)
+        possibleEdges.extend(q.edges)
         return possibleEdges
 
     @staticmethod
     def getFirstIntersection(possibleEdges, p, q):
         points = []
 
+        line = mock.Mock()
+        line.a, line.b, line.c = Diagrama.getLineEquition(p, q)
+
+
+        for x in possibleEdges:
+            p = Diagrama.findIntersectionPoint(line, x)
+            p.face1 = x.face1
+            p.face2 = x.face2
+            p.edge = x
+            points.append(p)
+
+        return points, line
+
+
+    @staticmethod
+    def getNextPointFromAllIntersections(intersections, pointFrom=""):
+        if pointFrom:
+            intersections.sort(key=lambda point: point.y, reverse=True)
+            for x in intersections:
+                if x.y <= pointFrom.y and not(x.x== pointFrom.x and x.y == pointFrom.y):
+                    return x
+
+        else:
+            p = max(intersections, key=lambda point: point.y)
+            return p
+
+    @staticmethod
+    def findIntersectionPoint(line, edge):
+        y = (edge.c * line.a / edge.a - line.c) / (line.b - (line.a * edge.b / edge.a))
+        x = -(edge.c + edge.b * y) / edge.a
+        p = Point(x, y)
+        return p
+
+    @staticmethod
+    def getLineEquition(p, q):
         x_center = (p.point.x + q.point.x) / 2
         y_center = (p.point.y + q.point.y) / 2
 
@@ -183,39 +212,10 @@ class Diagrama:
         b_perp = a_line
         c_perp = -b_perp * y_center - a_perp * x_center
 
-        line = mock.Mock()
+        return a_perp, b_perp, c_perp
 
-        line.a = a_perp
-        line.b = b_perp
-        line.c = c_perp
-
-
-        for x in possibleEdges:
-            p = Diagrama.findIntersectionPoint(line, x)
-            p.face1 = x.face
-            p.face2 = x.twin.face
-            p.edge = x
-            points.append(p)
-
-        return points, line
-
-
-    @staticmethod
-    def getNextPointFromAllIntersections(intersections, pointFrom=""):
-        if pointFrom:
-            intersections.sort(key=lambda point: point.y)
-            k = 7
-
-        else:
-            p = max(intersections, key=lambda point: point.y)
-            return p
-
-
-
-
-    @staticmethod
-    def findIntersectionPoint(line, edge):
-        y = (edge.c * line.a / edge.a - line.c) / (line.b - (line.a * edge.b / edge.a))
-        x = -(edge.c + edge.b * y) / edge.a
-        p = Point(x, y)
-        return p
+    def getVertex(self, x, y):
+        v = Vertex(Point(x, y))
+        for x in self.vertexes:
+            if x == v:
+                return x
