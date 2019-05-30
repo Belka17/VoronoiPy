@@ -153,7 +153,6 @@ class Diagrama:
         d.edges.append(e)
 
 
-        d.Paint()
         return d
 
     @staticmethod

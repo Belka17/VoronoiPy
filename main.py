@@ -82,17 +82,21 @@ def split(points, indexStrart, indexEnd):
 def main():
     points = []
 
-    points.append(Point(3,2))
-    points.append(Point(4,1))
-    points.append(Point(5,6))
-    points.append(Point(6,6))
-    points.append(Point(7,8))
+    points.append(Point(1,6))
+    points.append(Point(3,3))
+    points.append(Point(4,4))
+    points.append(Point(5,7))
+    points.append(Point(6,2))
+    points.append(Point(8,9))
+    points.append(Point(9,12))
+    points.append(Point(11,3))
 
     #points.append(Point(1,4))
     #points.append(Point(5,4))
     #points.append(Point(7,6))
     #points.append(Point(8,1))
-    split(points, 0 , len(points) - 1)
+    d = split(points, 0 , len(points) - 1)
+    d.Paint()
 
 
 if __name__ == '__main__':

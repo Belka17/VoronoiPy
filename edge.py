@@ -16,14 +16,25 @@ class Edge :
     def draw(self, plt):
         if self.pointTo and self.pointFrom:
             x_curr = self.pointFrom.x
-            delta = 0.05
-            if self.pointTo.x < self.pointFrom.x:
-                delta = -delta
-            while abs(x_curr - self.pointTo.x) > 0.1 :
-                y_curr = -(self.c + self.a*x_curr )/ self.b
-                plt.scatter(x_curr, y_curr, s=1)
-                x_curr += delta
-            return
+            delta = 0.09
+            if self.b != 0:
+
+
+                if self.pointTo.x < self.pointFrom.x:
+                    delta = -delta
+                while abs(x_curr - self.pointTo.x) > 0.1 :
+                    y_curr = -(self.c + self.a*x_curr )/ self.b
+                    plt.scatter(x_curr, y_curr, s=1)
+                    x_curr += delta
+                return
+            else:
+                y_curr = min(self.pointFrom.y, self.pointTo.y)
+                y_max = max(self.pointFrom.y, self.pointTo.y)
+                while abs(y_max - y_curr) > 0.1:
+                    plt.scatter(x_curr, y_curr, s=1)
+                    y_curr += delta
+                return
+
         if self.pointFrom:
             x = self.pointFrom.x
         if self.pointTo:
