@@ -1,4 +1,6 @@
 import math
+from point import Point
+
 
 
 class Edge :
@@ -13,12 +15,12 @@ class Edge :
         self.b = b
         self.c = c
 
-    def draw(self, plt):
+    def draw(self, plt, d):
+        delta = 0.09
         if self.pointTo and self.pointFrom:
             x_curr = self.pointFrom.x
-            delta = 0.09
-            if self.b != 0:
 
+            if self.b != 0:
 
                 if self.pointTo.x < self.pointFrom.x:
                     delta = -delta
@@ -35,35 +37,54 @@ class Edge :
                     y_curr += delta
                 return
 
+        x = 0
+        y = 0
         if self.pointFrom:
             x = self.pointFrom.x
+            y = self.pointFrom.y
         if self.pointTo:
             x = self.pointTo.x
+            y = self.pointTo.y
 
-        delta1 = 0.1
-        delta2 = -delta1
-        x_1 = x + delta1
-        x_2 = x + delta2
-        y_1 = -(self.c + self.a*x_1 )/ self.b
-        y_2 = -(self.c + self.a*x_2 )/ self.b
-        if self.distance(x_1, y_1, self.face1.point.x, self.face1.point.y) > self.distance(x_2, y_2, self.face1.point.x, self.face1.point.y):
-            delta = delta2
-        else:
-            delta = delta1
+        p = None
+        i = 0
+        while not p:
+            e = d.edges[i]
+            i += 1
+            p = Edge.findIntersectionPoint(self, e)
+            if p:
+                if p.x < x:
+                    delta = delta
+                if p.x > x:
+                    delta = -delta
+                if p.x == x:
+                    p = None
 
-        for i in range(0,70):
-            y =  -(self.c + self.a*x )/ self.b
+        if self.b == 0:
+            for i in range(0, 30):
+                plt.scatter(x, y, s=1)
+                y += delta
+            return
+
+        for i in range(0,30):
+            y = -(self.c + self.a*x )/ self.b
             plt.scatter(x, y, s=1)
             x = x + delta
-        t = 5
-
-
-
-
-
 
     def distance(self, x1, y1, x2, y2):
         return math.sqrt(math.pow((x1 - x2),2) + math.pow((y1 - y2), 2))
+
+    def __eq__(self, other):
+        return (self.face1 == other.face1 and self.face2 == other.face2) or (self.face1 == other.face2 and self.face2 == other.face1)
+
+    @staticmethod
+    def findIntersectionPoint(line, edge):
+        if abs(edge.a * line.b - edge.b * line.a) < 0.000001:
+            return None
+        y = (edge.c * line.a / edge.a - line.c) / (line.b - (line.a * edge.b / edge.a))
+        x = -(edge.c + edge.b * y) / edge.a
+        p = Point(x, y)
+        return p
 
 
 

@@ -103,7 +103,7 @@ class Diagrama:
         d.edges.extend(d2.edges)
         d.edges.extend(d1.edges)
         flag = False
-        """while not(p.point.x == cp_p.point.x and p.y == cp_p.point.y) and not(q.x == cp_q.point.x and q.y == cp_q.point.y):"""
+
         while not (p.point == cp_p.point and q.point == cp_q.point):
 
             possibleEdges = Diagrama.getPossibleEdges(p, q)
@@ -152,7 +152,7 @@ class Diagrama:
         e.face2.edges.append(e)
         d.edges.append(e)
 
-
+        d.Paint()
         return d
 
     @staticmethod
@@ -172,10 +172,11 @@ class Diagrama:
 
         for x in possibleEdges:
             p = Diagrama.findIntersectionPoint(line, x)
-            p.face1 = x.face1
-            p.face2 = x.face2
-            p.edge = x
-            points.append(p)
+            if p:
+                p.face1 = x.face1
+                p.face2 = x.face2
+                p.edge = x
+                points.append(p)
 
         return points, line
 
@@ -194,6 +195,8 @@ class Diagrama:
 
     @staticmethod
     def findIntersectionPoint(line, edge):
+        if abs(edge.a*line.b - edge.b*line.a) < 0.000001:
+            return None
         y = (edge.c * line.a / edge.a - line.c) / (line.b - (line.a * edge.b / edge.a))
         x = -(edge.c + edge.b * y) / edge.a
         p = Point(x, y)
@@ -226,7 +229,7 @@ class Diagrama:
 
 
         for y in self.edges:
-            y.draw(plt)
+            y.draw(plt, self)
 
         plt.show()
 
