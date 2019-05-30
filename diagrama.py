@@ -2,6 +2,7 @@ from unittest import mock
 from point import Point
 from edge import Edge
 from vertex import Vertex
+import matplotlib.pyplot as plt
 
 
 class Diagrama:
@@ -152,7 +153,7 @@ class Diagrama:
         d.edges.append(e)
 
 
-
+        d.Paint()
         return d
 
     @staticmethod
@@ -185,7 +186,7 @@ class Diagrama:
         if pointFrom:
             intersections.sort(key=lambda point: point.y, reverse=True)
             for x in intersections:
-                if x.y <= pointFrom.y and not(x.x== pointFrom.x and x.y == pointFrom.y):
+                if x.y <= pointFrom.y and x != pointFrom:
                     return x
 
         else:
@@ -219,3 +220,14 @@ class Diagrama:
         for x in self.vertexes:
             if x == v:
                 return x
+
+    def Paint(self):
+        for x in self.vertexes:
+            plt.scatter(x.point.x, x.point.y, s=10)
+
+
+        for y in self.edges:
+            y.draw(plt)
+
+        plt.show()
+

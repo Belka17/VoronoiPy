@@ -4,8 +4,8 @@ class Point:
         self.y = y
 
     def __eq__(self, other):
-        return self.x == other.x and self.y == other.y
+        return abs(self.x - other.x) < 0.00001 and abs(self.y - other.y) < 0.00001
 
     def __ne__(self, other):
-        x = self.x == other.x and self.y == other.y
+        x = self == other
         return not x
