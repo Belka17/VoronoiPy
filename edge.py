@@ -4,7 +4,7 @@ from point import Point
 
 
 class Edge :
-    def __init__(self, a=None, b=None, c=None, face1=None, face2=None,pointFrom=None, pointTo=None):
+    def __init__(self, a=None, b=None, c=None, face1=None, face2=None,pointFrom=None, pointTo=None, vectorX=None, vectorY = None):
 
         self.pointFrom = pointFrom
         self.pointTo = pointTo
@@ -14,6 +14,9 @@ class Edge :
         self.a = a
         self.b = b
         self.c = c
+
+        self.vectorX = vectorX
+        self.vectorY = vectorY
 
     def draw(self, plt, d):
         delta = 0.09
@@ -46,30 +49,15 @@ class Edge :
             x = self.pointTo.x
             y = self.pointTo.y
 
-        p = None
-        i = 0
-        while not p:
-            e = d.edges[i]
-            i += 1
-            p = Edge.findIntersectionPoint(self, e)
-            if p:
-                if p.x < x:
-                    delta = delta
-                if p.x > x:
-                    delta = -delta
-                if p.x == x:
-                    p = None
+        x_end = self.vectorX + x
+        if x_end < x:
+            delta = - delta
 
-        if self.b == 0:
-            for i in range(0, 30):
-                plt.scatter(x, y, s=1)
-                y += delta
-            return
-
-        for i in range(0,30):
+        while abs(x_end - x) > 0.1:
             y = -(self.c + self.a*x )/ self.b
             plt.scatter(x, y, s=1)
-            x = x + delta
+            x += delta
+
 
     def distance(self, x1, y1, x2, y2):
         return math.sqrt(math.pow((x1 - x2),2) + math.pow((y1 - y2), 2))

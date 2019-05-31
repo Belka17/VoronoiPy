@@ -2,7 +2,34 @@ from unittest import mock
 from point import Point
 from edge import Edge
 from vertex import Vertex
+import math
 import matplotlib.pyplot as plt
+
+
+def isLeft(a, b, c):
+    return ((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) > 0
+
+
+def checkIntersectForBorders(edge, point):
+    if not edge.pointTo and not edge.pointTo:
+        return point
+    if edge.pointFrom and edge.pointTo:
+        min_x = min(edge.pointTo.x, edge.pointFrom.x)
+        max_x = min(edge.pointTo.x, edge.pointFrom.x)
+        if point.x > min_x and point.x < max_x:
+            return point
+        else:
+            return None
+    if edge.pointTo:
+        p = edge.pointTo
+    else:
+        p = edge.pointFrom
+    v_x = point.x - p.x
+    lamda = v_x/edge.vectorX
+    if lamda > 0:
+        return point
+    else:
+        return None
 
 
 class Diagrama:
@@ -13,8 +40,8 @@ class Diagrama:
 
     @staticmethod
     def direction(p, q, qnext):
-        return (q.point.x - p.point.x) * (qnext.point.x - p.point.x) + (q.point.y - p.point.y) * (
-                    qnext.point.y - p.point.y)
+        return (q.x - p.x) * (qnext.x - p.x) + (q.y - p.y) * (
+                qnext.y - p.y)
 
     @staticmethod
     def pointPosition(p, q, qnext):
@@ -107,7 +134,7 @@ class Diagrama:
         while not (p.point == cp_p.point and q.point == cp_q.point):
 
             possibleEdges = Diagrama.getPossibleEdges(p, q)
-            points, line = Diagrama.getFirstIntersection(possibleEdges,p,q)
+            points, line = Diagrama.getIntersections(possibleEdges, p, q)
             e = Edge(line.a, line.b, line.c, p)
             e.face1 = d.getVertex(p.point.x, p.point.y)
             e.face2 = d.getVertex(q.point.x, q.point.y)
@@ -120,26 +147,103 @@ class Diagrama:
                 nextPoint = Diagrama.getNextPointFromAllIntersections(points, nextPoint)
             else:
                 nextPoint = Diagrama.getNextPointFromAllIntersections(points)
+                y = nextPoint.y + 1
+                x = -(e.c + e.b * y) / e.a
+                e.vectorX = x - nextPoint.x
+                e.vectorY = y - nextPoint.y
                 flag = True
 
             e.pointTo = Point(nextPoint.x, nextPoint.y)
             d.edges.append(e)
 
-            if nextPoint.edge.pointFrom:
-                nextPoint.edge.pointTo = Point(nextPoint.x, nextPoint.y)
-            else:
-                nextPoint.edge.pointFrom = Point(nextPoint.x, nextPoint.y)
+            y_h = nextPoint.y + 1
+            y_l = nextPoint.y - 1
+            e_x = -(e.c + e.b * y_h) / e.a
+            pE = Point(e_x, y_h)
 
-            if nextPoint.face1 == p :
+            if nextPoint.edge in d1.edges:
+                if nextPoint.edge.pointFrom and nextPoint.edge.pointTo:
+                    if isLeft(pE, nextPoint, nextPoint.edge.pointFrom):
+                        nextPoint.edge.pointFrom = nextPoint.x
+                    if isLeft(pE, nextPoint, nextPoint.edge.pointTo):
+                        nextPoint.edge.pointTo = nextPoint.x
+                        # if verticaly
+                if not nextPoint.edge.pointFrom and not nextPoint.edge.pointTo:
+                    nextPoint.edge.pointFrom = Point(nextPoint.x, nextPoint.y)
+
+                    x_h = -(nextPoint.edge.c + nextPoint.edge.b * y_h) / nextPoint.edge.a
+                    x_l = -(nextPoint.edge.c + nextPoint.edge.b * y_l) / nextPoint.edge.a
+                    pH = Point(x_h, y_h)
+                    pL = Point(x_l, y_l)
+
+                    if isLeft(pE, nextPoint, pH):
+                        nextPoint.edge.vectorX = x_l - nextPoint.x
+                        nextPoint.edge.vectorY = y_l - nextPoint.y
+                    else:
+                        nextPoint.edge.vectorX = x_h - nextPoint.x
+                        nextPoint.edge.vectorY = y_h - nextPoint.y
+
+                else:
+
+                    if nextPoint.edge.pointFrom:
+                        if isLeft(pE, nextPoint, nextPoint.edge.pointFrom):
+                            nextPoint.edge.pointFrom = Point(nextPoint.x, nextPoint.y)
+                        else:
+                            nextPoint.edge.pointTo = Point(nextPoint.x, nextPoint.y)
+                    else:
+                        if nextPoint.edge.pointTo:
+                            if isLeft(pE, nextPoint, nextPoint.edge.pointTo):
+                                nextPoint.edge.pointTo = Point(nextPoint.x, nextPoint.y)
+                            else:
+                                nextPoint.edge.pointFrom = Point(nextPoint.x, nextPoint.y)
+            else:
+                if nextPoint.edge.pointFrom and nextPoint.edge.pointTo:
+                    if isLeft(pE, nextPoint, nextPoint.edge.pointFrom):
+                        nextPoint.edge.pointTo = nextPoint.x
+                    if isLeft(pE, nextPoint, nextPoint.edge.pointTo):
+                        nextPoint.edge.pointFrom = nextPoint.x
+                        # if verticaly
+                if not nextPoint.edge.pointFrom and not nextPoint.edge.pointTo:
+                    nextPoint.edge.pointFrom = Point(nextPoint.x, nextPoint.y)
+                    y_h = nextPoint.y + 1
+                    y_l = nextPoint.y - 1
+                    e_x = -(e.c + e.b * y_h) / e.a
+                    x_h = -(nextPoint.edge.c + nextPoint.edge.b * y_h) / nextPoint.edge.a
+                    x_l = -(nextPoint.edge.c + nextPoint.edge.b * y_l) / nextPoint.edge.a
+                    pH = Point(x_h, y_h)
+                    pL = Point(x_l, y_l)
+                    pE = Point(e_x, y_h)
+                    if isLeft(pE, nextPoint, pL):
+                        nextPoint.edge.vectorX = x_l - nextPoint.x
+                        nextPoint.edge.vectorY = y_l - nextPoint.y
+                    else:
+                        nextPoint.edge.vectorX = x_h - nextPoint.x
+                        nextPoint.edge.vectorY = y_h - nextPoint.y
+
+                else:
+
+                    if nextPoint.edge.pointFrom:
+                        if isLeft(pE, nextPoint, nextPoint.edge.pointFrom):
+                            nextPoint.edge.pointTo = Point(nextPoint.x, nextPoint.y)
+                        else:
+                            nextPoint.edge.pointFrom = Point(nextPoint.x, nextPoint.y)
+                    else:
+                        if nextPoint.edge.pointTo:
+                            if isLeft(pE, nextPoint, nextPoint.edge.pointTo):
+                                nextPoint.edge.pointFrom = Point(nextPoint.x, nextPoint.y)
+                            else:
+                                nextPoint.edge.pointTo = Point(nextPoint.x, nextPoint.y)
+
+            if nextPoint.face1 == p:
                 p = nextPoint.face2
                 continue
-            if nextPoint.face2 == p :
+            if nextPoint.face2 == p:
                 p = nextPoint.face1
                 continue
-            if nextPoint.face1 == q :
+            if nextPoint.face1 == q:
                 q = nextPoint.face2
                 continue
-            if nextPoint.face2 == q :
+            if nextPoint.face2 == q:
                 q = nextPoint.face1
                 continue
 
@@ -151,9 +255,17 @@ class Diagrama:
         e.face1.edges.append(e)
         e.face2.edges.append(e)
         d.edges.append(e)
+        y = nextPoint.y - 1
+        x = -(e.c + e.b * y) / e.a
+        e.vectorX = x - nextPoint.x
+        e.vectorY = y - nextPoint.y
 
         d.Paint()
         return d
+
+    @staticmethod
+    def distance(x1, y1, x2, y2):
+        return math.sqrt(math.pow((x1 - x2), 2) + math.pow((y1 - y2), 2))
 
     @staticmethod
     def getPossibleEdges(p, q):
@@ -163,15 +275,15 @@ class Diagrama:
         return possibleEdges
 
     @staticmethod
-    def getFirstIntersection(possibleEdges, p, q):
+    def getIntersections(possibleEdges, p, q):
         points = []
 
         line = mock.Mock()
         line.a, line.b, line.c = Diagrama.getLineEquition(p, q)
 
-
         for x in possibleEdges:
             p = Diagrama.findIntersectionPoint(line, x)
+            p = checkIntersectForBorders(x, p)
             if p:
                 p.face1 = x.face1
                 p.face2 = x.face2
@@ -179,7 +291,6 @@ class Diagrama:
                 points.append(p)
 
         return points, line
-
 
     @staticmethod
     def getNextPointFromAllIntersections(intersections, pointFrom=""):
@@ -195,7 +306,7 @@ class Diagrama:
 
     @staticmethod
     def findIntersectionPoint(line, edge):
-        if abs(edge.a*line.b - edge.b*line.a) < 0.000001:
+        if abs(edge.a * line.b - edge.b * line.a) < 0.000001:
             return None
         y = (edge.c * line.a / edge.a - line.c) / (line.b - (line.a * edge.b / edge.a))
         x = -(edge.c + edge.b * y) / edge.a
@@ -227,9 +338,7 @@ class Diagrama:
         for x in self.vertexes:
             plt.scatter(x.point.x, x.point.y, s=10)
 
-
         for y in self.edges:
             y.draw(plt, self)
 
         plt.show()
-

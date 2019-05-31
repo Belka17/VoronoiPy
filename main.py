@@ -83,11 +83,15 @@ def main():
     points = []
 
 
-    points.append(Point(4,8))
+    points.append(Point(2,9))
+    points.append(Point(3,6))
     points.append(Point(5,2))
-    points.append(Point(6,9))
-    points.append(Point(8,3))
-    points.append(Point(9,3))
+    points.append(Point(7,4))
+    points.append(Point(9,1))
+    points.append(Point(10,8))
+    points.append(Point(12,3))
+
+
 
 
 
