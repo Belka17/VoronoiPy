@@ -19,26 +19,29 @@ class Edge :
         self.vectorY = vectorY
 
     def draw(self, plt, d):
-        delta = 0.09
+        delta = 0.04
+        if not self.pointFrom and not self.pointTo:
+            return
         if self.pointTo and self.pointFrom:
-            x_curr = self.pointFrom.x
-
-            if self.b != 0:
-
-                if self.pointTo.x < self.pointFrom.x:
-                    delta = -delta
-                while abs(x_curr - self.pointTo.x) > 0.1 :
-                    y_curr = -(self.c + self.a*x_curr )/ self.b
-                    plt.scatter(x_curr, y_curr, s=1)
-                    x_curr += delta
-                return
-            else:
-                y_curr = min(self.pointFrom.y, self.pointTo.y)
-                y_max = max(self.pointFrom.y, self.pointTo.y)
-                while abs(y_max - y_curr) > 0.1:
-                    plt.scatter(x_curr, y_curr, s=1)
-                    y_curr += delta
-                return
+            d = 6
+            # x_curr = self.pointFrom.x
+            #
+            # if self.b != 0:
+            #
+            #     if self.pointTo.x < self.pointFrom.x:
+            #         delta = -delta
+            #     while abs(x_curr - self.pointTo.x) > 0.1 :
+            #         y_curr = -(self.c + self.a*x_curr )/ self.b
+            #         plt.scatter(x_curr, y_curr, s=1)
+            #         x_curr += delta
+            #     return
+            # else:
+            #     y_curr = min(self.pointFrom.y, self.pointTo.y)
+            #     y_max = max(self.pointFrom.y, self.pointTo.y)
+            #     while abs(y_max - y_curr) > 0.1:
+            #         plt.scatter(x_curr, y_curr, s=1)
+            #         y_curr += delta
+            #     return
 
         x = 0
         y = 0
@@ -49,11 +52,11 @@ class Edge :
             x = self.pointTo.x
             y = self.pointTo.y
 
-        x_end = self.vectorX + x
+        x_end = 3*self.vectorX + x
         if x_end < x:
             delta = - delta
 
-        while abs(x_end - x) > 0.1:
+        while abs(x_end - x) > 0.05:
             y = -(self.c + self.a*x )/ self.b
             plt.scatter(x, y, s=1)
             x += delta

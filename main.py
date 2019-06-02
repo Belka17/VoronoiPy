@@ -23,19 +23,14 @@ def split(points, indexStrart, indexEnd):
                 x2 = points[indexStrart]
                 x1 = points[indexEnd]
         else :
-            print("x1:")
-            print(points[indexStrart].x)
-            print(points[indexStrart].y)
-            print("x2:")
-            print(points[indexEnd].x)
-            print(points[indexEnd].y)
+            print("enter right points by x")
+
 
         y_center = (x1.y + x2.y)/2
         x_center = (x1.x + x2.x)/2
 
         a_line = x2.y - x1.y
         b_line = -(x2.x - x1.x)
-        """c_line = x1.y(x2.x - x1.x) - x1.x(x2.y - x1.y)"""
 
         a_perp = -b_line
         b_perp = a_line
@@ -83,13 +78,27 @@ def main():
     points = []
 
 
-    points.append(Point(2,9))
-    points.append(Point(3,6))
-    points.append(Point(5,2))
-    points.append(Point(7,4))
-    points.append(Point(9,1))
-    points.append(Point(10,8))
-    points.append(Point(12,3))
+
+
+    points.append(Point(5,1))
+    points.append(Point(6,1))
+    points.append(Point(7,1))
+    points.append(Point(7,5))
+    points.append(Point(8,8))
+    points.append(Point(8,4))
+    points.append(Point(9,4))
+    points.append(Point(10,4))
+    points.append(Point(11,5))
+    points.append(Point(12,7))
+    points.append(Point(14,17))
+    points.append(Point(15,5))
+    points.append(Point(16,7))
+    points.append(Point(18,13))
+
+
+    # points.append(Point(5,4))
+
+
 
 
 
